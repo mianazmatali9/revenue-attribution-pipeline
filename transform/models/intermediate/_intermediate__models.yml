@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: int_user_attribution
+    description: >
+      One row per user — resolved attribution. Channel always comes from the
+      *_touch_channel fields; utm_source/referral_source are corroborating signals.
+      attribution_quality is a single mutually-exclusive label prioritising the issue
+      that most affects attribution (touch conflict first).
+    columns:
+      - name: user_id
+        data_tests: [unique, not_null]
+      - name: first_touch_channel
+        data_tests: [not_null]
+      - name: last_touch_channel
+        data_tests: [not_null]
+      - name: attribution_quality
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [clean, touch_conflict, utm_tracking_loss, referral_mismatch, organic_no_utm]
+
+  - name: int_user_revenue
+    description: One row per user — revenue summary (total, months, type).
+    columns:
+      - name: user_id
+        data_tests: [unique, not_null]
+      - name: total_revenue
+        data_tests: [not_null]
+
+  - name: int_user_journey
+    description: One row per user — attribution stitched to realised revenue.
+    columns:
+      - name: user_id
+        data_tests: [unique, not_null]
+
+  - name: int_campaign_attribution
+    description: >
+      User-to-campaign links via channel + company + signup-window match, with each
+      user's revenue split across the campaigns they match (double-count guard).
+    columns:
+      - name: campaign_id
+        data_tests: [not_null]
+      - name: attributed_revenue
+        data_tests: [not_null]

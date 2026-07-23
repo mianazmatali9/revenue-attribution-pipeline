@@ -1,0 +1,29 @@
+name: "attribution"
+version: "1.0.0"
+config-version: 2
+
+profile: "attribution"
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  attribution:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts
+
+# Surface the reconciliation anchor to every model via {{ var('total_revenue') }}
+# if needed, and let tests reference the tolerance.
+vars:
+  reconciliation_tolerance: 0.01

@@ -1,0 +1,67 @@
+version: 2
+
+models:
+  - name: stg_user_signups
+    description: One row per user with attribution + data-quality flags.
+    columns:
+      - name: user_id
+        description: Primary key.
+        data_tests: [unique, not_null]
+      - name: company_id
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['CTC-001', 'CTC-002', 'CTC-003', 'CTC-004']
+      - name: first_touch_channel
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [youtube, twitter, instagram, newsletter, podcast, blog, organic, referral]
+      - name: last_touch_channel
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [youtube, twitter, instagram, newsletter, podcast, blog, organic, referral]
+
+  - name: stg_portfolio_revenue
+    description: One row per user-month of revenue. The reconciliation source of truth.
+    columns:
+      - name: revenue_id
+        data_tests: [unique, not_null]
+      - name: user_id
+        description: Referential integrity — every revenue user must exist in signups.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_user_signups')
+              field: user_id
+      - name: revenue_amount
+        data_tests: [not_null]
+      - name: revenue_type
+        data_tests:
+          - accepted_values:
+              values: [one_time, recurring]
+
+  - name: stg_content_performance
+    description: One row per content piece.
+    columns:
+      - name: content_id
+        data_tests: [unique, not_null]
+      - name: channel
+        data_tests:
+          - accepted_values:
+              values: [youtube, twitter, instagram, newsletter, podcast, blog]
+
+  - name: stg_campaign_metadata
+    description: One row per campaign.
+    columns:
+      - name: campaign_id
+        data_tests: [unique, not_null]
+      - name: utm_campaign
+        data_tests: [unique, not_null]
+      - name: channel
+        data_tests:
+          - accepted_values:
+              values: [youtube, twitter, instagram, newsletter, podcast, blog]
+      - name: budget
+        data_tests: [not_null]

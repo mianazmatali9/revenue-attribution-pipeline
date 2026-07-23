@@ -1,0 +1,358 @@
+<title>Attribution Comparison — Cross-Portfolio Revenue</title>
+<style>
+  :root {
+    color-scheme: light;
+    --plane:        #f9f9f7;
+    --surface:      #fcfcfb;
+    --surface-2:    #f4f3ef;
+    --ink:          #0b0b0b;
+    --ink-2:        #52514e;
+    --muted:        #898781;
+    --grid:         #e1e0d9;
+    --baseline:     #c3c2b7;
+    --border:       rgba(11,11,11,0.10);
+    --last:         #2a78d6;  /* last-touch series (validated) */
+    --first:        #eb6834;  /* first-touch series (validated) */
+    --critical:     #c0392f;
+    --good:         #0a7d24;
+    --last-soft:    rgba(42,120,214,0.12);
+    --shadow:       0 1px 2px rgba(11,11,11,0.04), 0 4px 16px rgba(11,11,11,0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --plane:        #0d0d0d;
+      --surface:      #1a1a19;
+      --surface-2:    #232321;
+      --ink:          #ffffff;
+      --ink-2:        #c3c2b7;
+      --muted:        #918f88;
+      --grid:         #2c2c2a;
+      --baseline:     #383835;
+      --border:       rgba(255,255,255,0.10);
+      --last:         #3987e5;
+      --first:        #d95926;
+      --critical:     #e06a62;
+      --good:         #2faf45;
+      --last-soft:    rgba(57,135,229,0.16);
+      --shadow:       0 1px 2px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --plane:        #0d0d0d;
+    --surface:      #1a1a19;
+    --surface-2:    #232321;
+    --ink:          #ffffff;
+    --ink-2:        #c3c2b7;
+    --muted:        #918f88;
+    --grid:         #2c2c2a;
+    --baseline:     #383835;
+    --border:       rgba(255,255,255,0.10);
+    --last:         #3987e5;
+    --first:        #d95926;
+    --critical:     #e06a62;
+    --good:         #2faf45;
+    --last-soft:    rgba(57,135,229,0.16);
+    --shadow:       0 1px 2px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--plane);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 24px 64px; }
+  .mono { font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 10px;
+  }
+  h1 { font-size: clamp(26px, 4vw, 38px); line-height: 1.1; margin: 0 0 12px; letter-spacing: -0.02em; text-wrap: balance; }
+  .lede { font-size: 17px; color: var(--ink-2); max-width: 64ch; margin: 0; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--last-soft); color: var(--ink);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; font-size: 12.5px; font-weight: 500; margin-top: 18px;
+  }
+  .tag .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); }
+
+  /* KPI row */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 30px 0; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 18px 16px; box-shadow: var(--shadow); }
+  .kpi .k-label { font-size: 12px; color: var(--muted); margin: 0 0 8px; font-weight: 500; }
+  .kpi .k-val { font-size: 30px; font-weight: 680; letter-spacing: -0.02em; margin: 0; }
+  .kpi .k-sub { font-size: 12.5px; color: var(--ink-2); margin: 5px 0 0; }
+
+  /* cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
+  .card h2 { font-size: 18px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .card .sub { font-size: 13.5px; color: var(--ink-2); margin: 0 0 20px; max-width: 70ch; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-2 .card { margin-bottom: 0; }
+
+  /* legend */
+  .legend { display: flex; gap: 18px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .legend .item { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink-2); font-weight: 500; }
+  .legend .swatch { width: 12px; height: 12px; border-radius: 3px; }
+
+  /* grouped bars */
+  .bars-wrap { display: flex; flex-direction: column; gap: 14px; }
+  .bar-row { display: grid; grid-template-columns: 92px 1fr; gap: 14px; align-items: center; }
+  .bar-name { font-size: 13.5px; font-weight: 550; text-align: right; }
+  .bar-name .type { display: block; font-size: 10.5px; color: var(--muted); font-weight: 400; letter-spacing: 0.03em; }
+  .bar-pair { display: flex; flex-direction: column; gap: 5px; }
+  .bar-track { position: relative; display: flex; align-items: center; height: 20px; }
+  .bar { height: 20px; border-radius: 0 4px 4px 0; min-width: 2px; transition: filter .12s; }
+  .bar.last { background: var(--last); }
+  .bar.first { background: var(--first); }
+  .bar-track:hover .bar { filter: brightness(1.08) saturate(1.1); cursor: default; }
+  .bar-val { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--ink-2); margin-left: 8px; white-space: nowrap; }
+
+  .callout { display: flex; gap: 14px; align-items: flex-start; background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--last); border-radius: 10px; padding: 14px 16px; margin-top: 22px; }
+  .callout .big { font-size: 13.5px; }
+  .callout b { font-weight: 650; }
+
+  /* SVG charts */
+  svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .axis-lbl { font-size: 10.5px; fill: var(--muted); font-family: ui-monospace, Menlo, monospace; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .baseline { stroke: var(--baseline); stroke-width: 1; }
+
+  /* CAC bars */
+  .cac-row { display: grid; grid-template-columns: 78px 1fr 96px; gap: 12px; align-items: center; margin-bottom: 11px; }
+  .cac-name { font-size: 13px; font-weight: 550; text-transform: capitalize; }
+  .cac-track { background: var(--surface-2); border-radius: 5px; height: 22px; position: relative; overflow: hidden; }
+  .cac-fill { height: 100%; border-radius: 5px; background: var(--last); }
+  .cac-fill.warn { background: var(--critical); }
+  .cac-meta { font-size: 12px; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+  .pill { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 2px 7px; border-radius: 999px; }
+  .pill.stop { background: color-mix(in srgb, var(--critical) 16%, transparent); color: var(--critical); }
+  .pill.keep { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good); }
+
+  /* quality stack */
+  .q-stack { display: flex; height: 30px; border-radius: 7px; overflow: hidden; border: 1px solid var(--border); }
+  .q-seg { height: 100%; }
+  .q-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .q-item { display: grid; grid-template-columns: 12px 1fr auto; gap: 10px; align-items: center; font-size: 13px; }
+  .q-item .sw { width: 12px; height: 12px; border-radius: 3px; }
+  .q-item .n { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+  table.data { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 14px; font-variant-numeric: tabular-nums; }
+  table.data th, table.data td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  table.data th:first-child, table.data td:first-child { text-align: left; }
+  table.data th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  details { margin-top: 16px; }
+  summary { cursor: pointer; font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
+
+  footer { margin-top: 12px; color: var(--ink-2); font-size: 13px; }
+  footer .recon { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; box-shadow: var(--shadow); }
+  footer .recon b { color: var(--ink); }
+  footer .prov { margin-top: 14px; font-size: 12px; color: var(--muted); }
+
+  /* tooltip */
+  #tt { position: fixed; pointer-events: none; opacity: 0; transform: translate(-50%, -110%); background: var(--ink); color: var(--plane); font-size: 12px; padding: 8px 10px; border-radius: 7px; white-space: nowrap; z-index: 50; box-shadow: 0 6px 20px rgba(0,0,0,0.25); transition: opacity .1s; font-variant-numeric: tabular-nums; }
+  #tt .tt-t { font-weight: 650; margin-bottom: 3px; }
+  #tt b { color: #fff; }
+
+  @media (max-width: 860px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Alpha Tango · Cross-Portfolio Analytics</p>
+    <h1>Which content actually drives revenue</h1>
+    <p class="lede">Content&nbsp;→&nbsp;signup&nbsp;→&nbsp;revenue across four portfolio companies, counted two ways. Every dollar is attributed exactly once per method, so both views reconcile to the same total.</p>
+    <span class="tag"><span class="dot"></span>Reconciled to source — $4,011,694.74 under both attribution models</span>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="card">
+    <h2>Attributed revenue by channel — last-touch vs first-touch</h2>
+    <p class="sub"><b>Last-touch</b> credits the channel a customer came through right before signing up; <b>first-touch</b> credits the channel that first brought them in. They agree on the 71% of customers who took one path, and diverge on the other 29%.</p>
+    <div class="legend">
+      <span class="item"><span class="swatch" style="background:var(--last)"></span>Last-touch</span>
+      <span class="item"><span class="swatch" style="background:var(--first)"></span>First-touch</span>
+      <span class="item" style="margin-left:auto;color:var(--muted)">Hover a bar for detail</span>
+    </div>
+    <div class="bars-wrap" id="bars"></div>
+    <div class="callout">
+      <div class="big">The top three — <b>YouTube, Instagram, Twitter</b> — hold their rank under both methods, so that ranking is trustworthy. <b>Referral</b> swings the most: <b>$444K</b> counting the last touch but only <b>$356K</b> counting the first — it rarely <i>starts</i> a customer relationship, but often <i>closes</i> one.</div>
+    </div>
+    <details>
+      <summary>Show data table</summary>
+      <table class="data" id="chan-table"></table>
+    </details>
+  </section>
+
+  <div class="grid-2">
+    <section class="card">
+      <h2>Revenue over time</h2>
+      <p class="sub">Ramps to a ~$237K/mo plateau, then runs off — because the sample stops acquiring new customers after Jun&nbsp;2025. The decline is a data-window artifact, not churn.</p>
+      <div id="trend"></div>
+    </section>
+    <section class="card">
+      <h2>Revenue retention by channel</h2>
+      <p class="sub">Share of a signup cohort still generating revenue N months later. The curve is <b>the same across every channel</b> (~4.4 months avg) — channel drives acquisition volume, not customer value.</p>
+      <div id="retention"></div>
+    </section>
+  </div>
+
+  <div class="grid-2" style="margin-top:20px">
+    <section class="card">
+      <h2>The clearest "stop doing" — BrightPath Education</h2>
+      <p class="sub">Revenue returned per $1 of spend, by channel. BrightPath's largest line — $65K on YouTube — barely breaks even, while Instagram &amp; Twitter return 30×+ at a fraction of the cost.</p>
+      <div id="cac"></div>
+    </section>
+    <section class="card">
+      <h2>How messy is the attribution?</h2>
+      <p class="sub">Every user is labelled, none dropped. The dirty slice isn't noise — it's where the two models disagree.</p>
+      <div class="q-stack" id="q-stack"></div>
+      <div class="q-list" id="q-list"></div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="recon" style="margin-top:20px">
+      <b>Why you can trust these numbers.</b> The revenue table has ~27,426 rows across 6,170 users (revenue recurs monthly). Attribution enriches each revenue row exactly once, so summing by <i>either</i> method returns <b>$4,011,694.74</b> — no fan-out, no double-count. An automated test fails the build if attributed revenue ever exceeds total revenue.
+      <div class="prov">What I don't trust: campaign-level ROI (only <b>10.9%</b> of revenue ties to a specific campaign; the campaign tags are wrong most of the time) · organic is undercounted by design (no tracking tag) · the mid-tier ranking depends on first- vs last-touch · the forecast projects run-off, not a real trajectory.</div>
+    </div>
+  </footer>
+</div>
+
+<div id="tt"></div>
+
+<script>
+const DATA = {"total_revenue":4011694.74,"channels":[{"name":"YouTube","channel":"youtube","last_touch":671856.0,"first_touch":730535.0,"pct":16.7,"ctype":"content"},{"name":"Instagram","channel":"instagram","last_touch":635641.0,"first_touch":685871.0,"pct":15.8,"ctype":"content"},{"name":"Twitter/X","channel":"twitter","last_touch":507573.0,"first_touch":524107.0,"pct":12.7,"ctype":"content"},{"name":"Podcast","channel":"podcast","last_touch":474973.0,"first_touch":449836.0,"pct":11.8,"ctype":"content"},{"name":"Blog","channel":"blog","last_touch":459833.0,"first_touch":469482.0,"pct":11.5,"ctype":"content"},{"name":"Referral","channel":"referral","last_touch":444068.0,"first_touch":356429.0,"pct":11.1,"ctype":"earned"},{"name":"Newsletter","channel":"newsletter","last_touch":411670.0,"first_touch":410929.0,"pct":10.3,"ctype":"content"},{"name":"Organic","channel":"organic","last_touch":406079.0,"first_touch":384505.0,"pct":10.1,"ctype":"earned"}],"type_split":[{"ctype":"content","rev":3161547.0},{"ctype":"earned","rev":850148.0}],"trend":[{"m":"2024-01","rev":56175.0},{"m":"2024-02","rev":82565.0},{"m":"2024-03","rev":113361.0},{"m":"2024-04","rev":130893.0},{"m":"2024-05","rev":146989.0},{"m":"2024-06","rev":152334.0},{"m":"2024-07","rev":167686.0},{"m":"2024-08","rev":182001.0},{"m":"2024-09","rev":196495.0},{"m":"2024-10","rev":205630.0},{"m":"2024-11","rev":209489.0},{"m":"2024-12","rev":213312.0},{"m":"2025-01","rev":234262.0},{"m":"2025-02","rev":233060.0},{"m":"2025-03","rev":240797.0},{"m":"2025-04","rev":234091.0},{"m":"2025-05","rev":242603.0},{"m":"2025-06","rev":186563.0},{"m":"2025-07","rev":155171.0},{"m":"2025-08","rev":130015.0},{"m":"2025-09","rev":109113.0},{"m":"2025-10","rev":88798.0},{"m":"2025-11","rev":73679.0},{"m":"2025-12","rev":59424.0},{"m":"2026-01","rev":49498.0},{"m":"2026-02","rev":37410.0},{"m":"2026-03","rev":29370.0},{"m":"2026-04","rev":22709.0},{"m":"2026-05","rev":16183.0},{"m":"2026-06","rev":12017.0}],"cac_brightpath":[{"channel":"instagram","customers":209,"spend":2500.0,"cac":11.96,"rev_per_dollar":35.19},{"channel":"twitter","customers":207,"spend":2500.0,"cac":12.08,"rev_per_dollar":29.74},{"channel":"blog","customers":166,"spend":32500.0,"cac":195.78,"rev_per_dollar":1.92},{"channel":"youtube","customers":236,"spend":65000.0,"cac":275.42,"rev_per_dollar":1.07}],"campaigns_top":[{"name":"podcast_ctc004_feb2024","channel":"podcast","budget":2500,"rev":22931.97,"roi":9.173},{"name":"instagram_ctc001_feb2024","channel":"instagram","budget":2500,"rev":17741.77,"roi":7.097},{"name":"twitter_ctc002_mar2024","channel":"twitter","budget":2500,"rev":16329.06,"roi":6.532},{"name":"blog_ctc001_oct2024","channel":"blog","budget":2500,"rev":11957.43,"roi":4.783},{"name":"blog_ctc003_mar2024","channel":"blog","budget":7500,"rev":29122.22,"roi":3.883},{"name":"podcast_ctc003_apr2024","channel":"podcast","budget":10000,"rev":35992.56,"roi":3.599},{"name":"blog_ctc001_jan2024","channel":"blog","budget":7500,"rev":21521.25,"roi":2.87},{"name":"newsletter_ctc004_mar2024","channel":"newsletter","budget":5000,"rev":14167.75,"roi":2.834}],"campaign_coverage":{"revenue_tied":438915.0,"total_spend":365000,"pct":10.9},"retention":[{"month_index":0,"retention":1.0},{"month_index":1,"retention":0.6},{"month_index":2,"retention":0.499},{"month_index":3,"retention":0.416},{"month_index":4,"retention":0.349},{"month_index":5,"retention":0.293},{"month_index":6,"retention":0.238},{"month_index":7,"retention":0.2},{"month_index":8,"retention":0.169},{"month_index":9,"retention":0.139},{"month_index":10,"retention":0.115},{"month_index":11,"retention":0.093},{"month_index":12,"retention":0.078}],"quality":[{"q":"clean","n":3610},{"q":"touch_conflict","n":1808},{"q":"organic_no_utm","n":369},{"q":"referral_mismatch","n":278},{"q":"utm_tracking_loss","n":105}],"companies":[{"id":"CTC-003","name":"QuickFix Auto Repair","rev":1425804.0},{"id":"CTC-004","name":"Summit Dental Group","rev":1208409.0},{"id":"CTC-001","name":"GreenLeaf Landscaping","rev":837467.0},{"id":"CTC-002","name":"BrightPath Education","rev":540015.0}]};
+
+const fmtK = v => '$' + Math.round(v/1000) + 'K';
+const fmtFull = v => '$' + Math.round(v).toLocaleString();
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// ---- tooltip ----
+const tt = document.getElementById('tt');
+function showTT(html, e){ tt.innerHTML = html; tt.style.opacity = 1; moveTT(e); }
+function moveTT(e){ tt.style.left = e.clientX + 'px'; tt.style.top = e.clientY + 'px'; }
+function hideTT(){ tt.style.opacity = 0; }
+
+// ---- KPIs ----
+const totalContent = DATA.type_split.find(t=>t.ctype==='content').rev;
+const contentPct = (100*totalContent/DATA.total_revenue).toFixed(1);
+const top2 = DATA.channels.filter(c=>['youtube','instagram'].includes(c.channel)).reduce((s,c)=>s+c.last_touch,0);
+const kpis = [
+  { label:'Tracked customer revenue', val:'$4.01M', sub:'27,426 rows · 6,170 users · 18 months' },
+  { label:'From owned content', val: contentPct+'%', sub:'vs 21% organic + referral' },
+  { label:'YouTube + Instagram', val: (100*top2/DATA.total_revenue).toFixed(0)+'%', sub:'top 2 under both methods — '+fmtK(top2) },
+  { label:'Revenue tied to a campaign', val: DATA.campaign_coverage.pct+'%', sub:'campaign ROI is directional only' },
+];
+document.getElementById('kpis').innerHTML = kpis.map(k=>`
+  <div class="kpi"><p class="k-label">${k.label}</p><p class="k-val">${k.val}</p><p class="k-sub">${k.sub}</p></div>`).join('');
+
+// ---- grouped bars ----
+const maxRev = Math.max(...DATA.channels.flatMap(c=>[c.last_touch,c.first_touch]));
+document.getElementById('bars').innerHTML = DATA.channels.map(c=>{
+  const wl = (100*c.last_touch/maxRev).toFixed(1), wf = (100*c.first_touch/maxRev).toFixed(1);
+  const delta = c.last_touch - c.first_touch;
+  const dtxt = (delta>=0?'+':'−') + fmtK(Math.abs(delta));
+  return `<div class="bar-row">
+    <div class="bar-name">${c.name}<span class="type">${c.ctype}</span></div>
+    <div class="bar-pair">
+      <div class="bar-track" data-tt='<div class="tt-t">${c.name} · Last-touch</div>Revenue <b>${fmtFull(c.last_touch)}</b> · ${c.pct}% of total'>
+        <div class="bar last" style="width:${wl}%"></div><span class="bar-val">${fmtK(c.last_touch)}</span></div>
+      <div class="bar-track" data-tt='<div class="tt-t">${c.name} · First-touch</div>Revenue <b>${fmtFull(c.first_touch)}</b> · last−first ${dtxt}'>
+        <div class="bar first" style="width:${wf}%"></div><span class="bar-val">${fmtK(c.first_touch)}</span></div>
+    </div>
+  </div>`;
+}).join('');
+
+// channel data table
+document.getElementById('chan-table').innerHTML =
+  '<thead><tr><th>Channel</th><th>Last-touch</th><th>First-touch</th><th>Δ last−first</th><th>% total</th></tr></thead><tbody>' +
+  DATA.channels.map(c=>`<tr><td>${c.name}</td><td>${fmtFull(c.last_touch)}</td><td>${fmtFull(c.first_touch)}</td><td>${(c.last_touch-c.first_touch>=0?'+':'−')+fmtFull(Math.abs(c.last_touch-c.first_touch))}</td><td>${c.pct}%</td></tr>`).join('') +
+  '</tbody>';
+
+// ---- line chart helper ----
+function lineChart(el, pts, opts){
+  const W=460, H=200, mL=44, mR=14, mT=14, mB=26;
+  const xs = pts.map((_,i)=>i), ys = pts.map(p=>p.y);
+  const maxY = opts.maxY!=null?opts.maxY:Math.max(...ys)*1.08, minY = opts.minY!=null?opts.minY:0;
+  const px = i => mL + (i/(pts.length-1))*(W-mL-mR);
+  const py = y => mT + (1-(y-minY)/(maxY-minY))*(H-mT-mB);
+  const ticks = opts.ticks || 4;
+  let grid='', ylab='';
+  for(let t=0;t<=ticks;t++){ const yv=minY+(maxY-minY)*t/ticks, y=py(yv);
+    grid+=`<line class="grid-line" x1="${mL}" y1="${y}" x2="${W-mR}" y2="${y}"/>`;
+    ylab+=`<text class="axis-lbl" x="${mL-8}" y="${y+3}" text-anchor="end">${opts.fmtY(yv)}</text>`; }
+  // split solid / dashed at breakIdx
+  const bi = opts.breakIdx!=null?opts.breakIdx:pts.length-1;
+  const path = idxs => idxs.map((i,k)=>(k?'L':'M')+px(i)+' '+py(pts[i].y)).join(' ');
+  const solidIdx=[...Array(bi+1).keys()], dashIdx=[...Array(pts.length-bi).keys()].map(i=>i+bi);
+  let shade='';
+  if(opts.breakIdx!=null){ const x0=px(bi); shade=`<rect x="${x0}" y="${mT}" width="${W-mR-x0}" height="${H-mT-mB}" fill="var(--critical)" opacity="0.06"/>
+    <line x1="${x0}" y1="${mT}" x2="${x0}" y2="${H-mB}" stroke="var(--critical)" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+    <text class="axis-lbl" x="${x0+5}" y="${mT+12}" fill="var(--critical)">run-off →</text>`; }
+  let xlab = opts.xLabels.map(([i,t])=>`<text class="axis-lbl" x="${px(i)}" y="${H-8}" text-anchor="middle">${t}</text>`).join('');
+  const dots = pts.map((p,i)=>`<circle cx="${px(i)}" cy="${py(p.y)}" r="9" fill="transparent" data-tt='<div class="tt-t">${p.label}</div>${opts.ttVal(p)}' style="cursor:default"/>`).join('');
+  const endI = bi; const emph = `<circle cx="${px(endI)}" cy="${py(pts[endI].y)}" r="3.5" fill="var(--last)"/>`;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img">
+    ${grid}${shade}
+    <path d="${path(solidIdx)}" fill="none" stroke="var(--last)" stroke-width="2"/>
+    ${opts.breakIdx!=null?`<path d="${path(dashIdx)}" fill="none" stroke="var(--last)" stroke-width="2" stroke-dasharray="4 3" opacity="0.55"/>`:''}
+    ${emph}${ylab}${xlab}${dots}
+    <line class="baseline" x1="${mL}" y1="${H-mB}" x2="${W-mR}" y2="${H-mB}"/>
+  </svg>`;
+}
+
+// trend
+lineChart(document.getElementById('trend'), DATA.trend.map(d=>({y:d.rev,label:d.m,rev:d.rev})), {
+  fmtY:v=>'$'+Math.round(v/1000)+'K', ticks:4,
+  breakIdx: DATA.trend.findIndex(d=>d.m==='2025-06'),
+  xLabels:[[0,'Jan24'],[11,'Dec24'],[17,'Jun25'],[29,'Jun26']],
+  ttVal:p=>`Revenue <b>${fmtFull(p.rev)}</b>`
+});
+// retention
+lineChart(document.getElementById('retention'), DATA.retention.map(d=>({y:d.retention,label:'Month '+d.month_index,r:d.retention})), {
+  fmtY:v=>Math.round(v*100)+'%', ticks:4, minY:0, maxY:1.05,
+  xLabels:[[0,'M0'],[3,'M3'],[6,'M6'],[9,'M9'],[12,'M12']],
+  ttVal:p=>`<b>${Math.round(p.r*100)}%</b> still generating revenue`
+});
+
+// ---- CAC ----
+const maxRpd = Math.max(...DATA.cac_brightpath.map(c=>c.rev_per_dollar));
+document.getElementById('cac').innerHTML = DATA.cac_brightpath.map(c=>{
+  const warn = c.rev_per_dollar < 2;
+  const w = (100*c.rev_per_dollar/maxRpd).toFixed(1);
+  const pill = warn ? '<span class="pill stop">STOP</span>' : (c.rev_per_dollar>10?'<span class="pill keep">KEEP</span>':'');
+  return `<div class="cac-row">
+    <div class="cac-name">${c.channel} ${pill}</div>
+    <div class="cac-track" data-tt='<div class="tt-t">BrightPath · ${c.channel}</div>Spend <b>${fmtFull(c.spend)}</b> · CAC <b>$${c.cac}</b> · ${c.customers} customers'>
+      <div class="cac-fill ${warn?'warn':''}" style="width:${Math.max(w,2)}%"></div></div>
+    <div class="cac-meta">$${c.rev_per_dollar}/＄1</div>
+  </div>`;
+}).join('');
+
+// ---- quality stack ----
+const qColors = { clean:'var(--good)', touch_conflict:'var(--first)', organic_no_utm:'var(--last)', referral_mismatch:'#8a6fc0', utm_tracking_loss:'var(--critical)' };
+const qLabels = { clean:'Clean (agree)', touch_conflict:'First≠last touch', organic_no_utm:'Organic — no tag (expected)', referral_mismatch:'Referral contradicts tag', utm_tracking_loss:'Tracking loss' };
+const qTotal = DATA.quality.reduce((s,q)=>s+q.n,0);
+document.getElementById('q-stack').innerHTML = DATA.quality.map(q=>
+  `<div class="q-seg" style="width:${100*q.n/qTotal}%;background:${qColors[q.q]}" data-tt='<div class="tt-t">${qLabels[q.q]}</div><b>${q.n.toLocaleString()}</b> users · ${(100*q.n/qTotal).toFixed(1)}%'></div>`).join('');
+document.getElementById('q-list').innerHTML = DATA.quality.map(q=>
+  `<div class="q-item"><span class="sw" style="background:${qColors[q.q]}"></span><span>${qLabels[q.q]}</span><span class="n">${q.n.toLocaleString()} · ${(100*q.n/qTotal).toFixed(0)}%</span></div>`).join('');
+
+// ---- wire tooltips (delegation) ----
+document.addEventListener('mouseover', e=>{ const t=e.target.closest('[data-tt]'); if(t) showTT(t.getAttribute('data-tt'), e); });
+document.addEventListener('mousemove', e=>{ if(tt.style.opacity==='1') moveTT(e); });
+document.addEventListener('mouseout', e=>{ if(e.target.closest('[data-tt]')) hideTT(); });
+</script>

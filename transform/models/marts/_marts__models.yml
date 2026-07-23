@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: fct_attributed_revenue
+    description: >
+      Core fact — one row per revenue record, enriched with both attribution models.
+      Reconciles to total revenue under either model (see singular tests
+      assert_revenue_reconciles_to_source and assert_attributed_not_exceeds_total).
+    columns:
+      - name: revenue_id
+        data_tests: [unique, not_null]
+      - name: revenue_amount
+        data_tests: [not_null]
+      - name: last_touch_channel
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [youtube, twitter, instagram, newsletter, podcast, blog, organic, referral]
+      - name: first_touch_channel
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [youtube, twitter, instagram, newsletter, podcast, blog, organic, referral]
+      - name: company_id
+        data_tests:
+          - relationships:
+              to: ref('dim_company')
+              field: company_id
+
+  - name: fct_content_performance
+    description: Content output & engagement by channel x publish month.
+    columns:
+      - name: channel
+        data_tests: [not_null]
+      - name: total_views
+        data_tests: [not_null]
+
+  - name: fct_campaign_roi
+    description: Spend vs attributed revenue per campaign (double-count-safe).
+    columns:
+      - name: campaign_id
+        data_tests: [unique, not_null]
+      - name: company_id
+        data_tests:
+          - relationships:
+              to: ref('dim_company')
+              field: company_id
+      - name: attributed_revenue
+        data_tests: [not_null]
+
+  - name: dim_company
+    columns:
+      - name: company_id
+        data_tests: [unique, not_null]
+
+  - name: dim_channel
+    columns:
+      - name: channel
+        data_tests: [unique, not_null]
+
+  - name: dim_time
+    columns:
+      - name: month_date
+        data_tests: [unique, not_null]
+
+  - name: dim_user_cohort
+    columns:
+      - name: user_id
+        data_tests: [unique, not_null]
+      - name: cohort_month
+        data_tests: [not_null]

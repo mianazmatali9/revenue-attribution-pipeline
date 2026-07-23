@@ -1,0 +1,13 @@
+# Self-contained profile (lives in the project, no ~/.dbt needed).
+# dbt is always invoked from the transform/ directory, so the DuckDB file
+# resolves one level up at the repo root: ../warehouse.duckdb
+#
+# To retarget BigQuery instead: swap this for a `bigquery` type block with your
+# project/dataset/keyfile — the models are written in portable ANSI SQL.
+attribution:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "../warehouse.duckdb"
+      threads: 4

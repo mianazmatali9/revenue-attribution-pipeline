@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >
+      Faithful copy of the four source files, loaded by ingestion/ingest.py.
+      No cleaning happens here — the raw layer stays auditable.
+    schema: raw
+    tables:
+      - name: raw_campaign_metadata
+        description: 30 marketing campaigns — channel, budget, dates, target company.
+      - name: raw_content_performance
+        description: ~1,370 content pieces with views/clicks/UTMs by channel.
+      - name: raw_user_signups
+        description: ~6,170 signups with first/last touch attribution and UTMs.
+      - name: raw_portfolio_revenue
+        description: ~27,426 user-month revenue rows (recurring + one-time).

@@ -1,0 +1,9 @@
+channel,last_touch_revenue,first_touch_revenue,last_minus_first,last_touch_rank,first_touch_rank,pct_of_total_last_touch
+youtube,671856.31,730535.26,-58678.95,1,1,16.7
+instagram,635641.46,685870.8,-50229.34,2,2,15.8
+twitter,507573.11,524106.89,-16533.78,3,3,12.7
+podcast,474972.69,449835.91,25136.78,4,5,11.8
+blog,459833.41,469482.1,-9648.69,5,4,11.5
+referral,444068.28,356429.23,87639.05,6,8,11.1
+newsletter,411670.25,410929.37,740.88,7,6,10.3
+organic,406079.23,384505.18,21574.05,8,7,10.1
